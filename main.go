@@ -1,33 +1,30 @@
+// Напишите программу, подсчитывающую сколько раз буква встречается в предложении, а также частоту встречаемости в процентах.
+
 package main
 
 import (
+	"bufio"
 	"fmt"
-	"log"
 	"os"
-	"strings"
+	"unicode"
 )
 
 func main() {
-	if len(os.Args) < 2 {
-		log.Fatal("Укажите полный путь до файла вторым аргументом")
+	fmt.Println("Введите предложение")
+	reader := bufio.NewReader(os.Stdin)
+	text, _ := reader.ReadString('\n')
+	myMap := make(map[rune]int, 100)
+	lenText := 0
+
+	for _,v := range text {
+		if unicode.IsLetter(v) {
+			lenText ++
+			myMap[unicode.ToLower(v)]++
+		}	
 	}
 
-	filePth := os.Args[1]
-	file := filePth[strings.LastIndex(filePth, "/") + 1:]
-	nameExt := strings.Split(file, ".")
-
-	var fileName, fileExt string
-	fileName = nameExt[0]
-	fileExt = nameExt[1]
-
-	// Напишите код, который выведет следующее
-	// filename: <name>
-	// extension: <extension>
-
-	// Подсказка. Возможно вам понадобится функция strings.LastIndex
-	// Для проверки своего решения используйте функции filepath.Base() filepath.Ext(
-	// ) Они могут помочь для проверки решения
-
-	fmt.Printf("filename: %s\n", fileName)
-	fmt.Printf("extension: %s\n", fileExt)
+	for k,v := range myMap {
+		percLetter := float64(v) / float64(lenText)
+		fmt.Printf("%c - %d %0.1f \n", k, v, percLetter)
+	}
 }
