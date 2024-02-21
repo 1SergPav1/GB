@@ -1,33 +1,56 @@
+// Напишите программу, которая будет хранить ваши url. На основании созданного шаблона допишите код, который позволяет
+//добавлять новые ссылки, удалять и выводить список.
+//Для решения задачи используйте структуры. Обязательные поля структуры должны быть дата добавления, имя ссылки,
+//теги для ссылки через запятую и сам url.
+
 package main
 
 import (
 	"fmt"
-	"log"
-	"os"
-	"strings"
+	"time"
 )
 
-func main() {
-	if len(os.Args) < 2 {
-		log.Fatal("Укажите полный путь до файла вторым аргументом")
+type Item struct {
+	Name, URL, Tags, Data string
+}
+
+func newItem(url, name, tags string) Item {
+	return Item{URL: url, Name: name, Tags: tags, Data: time.Now().Format(time.DateTime)}
+}
+
+func (i Item) ShowItem() string{
+	return fmt.Sprintf("Имя: <%s>\nURL: <%s>\nТеги: <%s>\nДата: <%s>\n", i.Name, i.URL, i.Tags, i.Data)
+}
+
+type URLmap map[string]Item
+
+func (u URLmap) Add(i Item) {
+	u[i.Name] = i
+}
+
+func (u URLmap) Del(name string) {
+	delete(u, name)
+}
+
+func (u URLmap) ShowAllURLs() {
+	fmt.Printf("\nВсего закладок: %d\n", len(u))
+	for _, v := range u {
+		fmt.Println(v.ShowItem())
 	}
+}
 
-	filePth := os.Args[1]
-	file := filePth[strings.LastIndex(filePth, "/") + 1:]
-	nameExt := strings.Split(file, ".")
+func main() {
+	myMap := URLmap{}
+	myMap.ShowAllURLs()
 
-	var fileName, fileExt string
-	fileName = nameExt[0]
-	fileExt = nameExt[1]
+	it1 := newItem("vk.com", "vk", "social_network")
+	it2 := newItem("gitlab.com", "gitlab", "version_control_system")
 
-	// Напишите код, который выведет следующее
-	// filename: <name>
-	// extension: <extension>
+	myMap.Add(it1)
+	myMap.Add(it2)
 
-	// Подсказка. Возможно вам понадобится функция strings.LastIndex
-	// Для проверки своего решения используйте функции filepath.Base() filepath.Ext(
-	// ) Они могут помочь для проверки решения
+	myMap.ShowAllURLs()
 
-	fmt.Printf("filename: %s\n", fileName)
-	fmt.Printf("extension: %s\n", fileExt)
+	myMap.Del("vk")
+	myMap.ShowAllURLs()
 }
