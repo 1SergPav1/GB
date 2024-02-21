@@ -6,112 +6,51 @@
 package main
 
 import (
-	"bufio"
 	"fmt"
-	"log"
-	"os"
-	"strings"
 	"time"
-
-	"github.com/eiannone/keyboard"
 )
 
 type Item struct {
-	Link string
-	URL  string
-	Tags string
-	Date string
+	Name, URL, Tags, Data string
 }
 
-func createItem(url, link, tags string) Item {
-	date := time.Now().Format(time.DateTime)
-	return Item{URL: url, Link: link, Tags: tags, Date: date}
+func newItem(url, name, tags string) Item {
+	return Item{URL: url, Name: name, Tags: tags, Data: time.Now().Format(time.DateTime)}
 }
 
-func (i Item) ShowItem() {
-	fmt.Printf("Имя: <%s>\nURL: <%s>\nТеги: <%s>\nДата: <%s>\n", i.Link, i.URL, i.Tags, i.Date)
+func (i Item) ShowItem() string{
+	return fmt.Sprintf("Имя: <%s>\nURL: <%s>\nТеги: <%s>\nДата: <%s>\n", i.Name, i.URL, i.Tags, i.Data)
 }
 
 type URLmap map[string]Item
 
-func (u URLmap) AddURL(i Item) {
-	u[i.Link] = i
+func (u URLmap) Add(i Item) {
+	u[i.Name] = i
 }
 
-func (u URLmap) DelURL(name string) {
+func (u URLmap) Del(name string) {
 	delete(u, name)
 }
 
 func (u URLmap) ShowAllURLs() {
 	fmt.Printf("\nВсего закладок: %d\n", len(u))
 	for _, v := range u {
-		v.ShowItem()
+		fmt.Println(v.ShowItem())
 	}
 }
 
 func main() {
-	defer func() {
-		// Завершаем работу с клавиатурой при выходе из функции
-		_ = keyboard.Close()
-	}()
-
-	fmt.Println("Программа для добавления url в список")
-	fmt.Println("Для выхода и приложения нажмите Esc")
-
 	myMap := URLmap{}
+	myMap.ShowAllURLs()
 
-OuterLoop:
-	for {
-		// Подключаем отслеживание нажатия клавиш
-		if err := keyboard.Open(); err != nil {
-			log.Fatal(err)
-		}
+	it1 := newItem("vk.com", "vk", "social_network")
+	it2 := newItem("gitlab.com", "gitlab", "version_control_system")
 
-		char, key, err := keyboard.GetKey()
-		if err != nil {
-			log.Fatal(err)
-		}
+	myMap.Add(it1)
+	myMap.Add(it2)
 
-		switch char {
-		case 'a':
-			if err := keyboard.Close(); err != nil {
-				log.Fatal(err)
-			}
+	myMap.ShowAllURLs()
 
-			// Добавление нового url в список хранения
-			fmt.Println("Введите новую запись в формате <url описание теги>")
-
-			reader := bufio.NewReader(os.Stdin)
-			text, _ := reader.ReadString('\n')
-			args := strings.Fields(text)
-			if len(args) < 3 {
-				fmt.Println("Введите правильный аргументы в формате url описание теги")
-				continue OuterLoop
-			}
-
-			newURL := createItem(args[0], args[1], args[2])
-			myMap.AddURL(newURL)
-		case 'r':
-			if err := keyboard.Close(); err != nil {
-				log.Fatal(err)
-			}
-			// Удаление url из списка хранения
-			fmt.Println("Введите имя ссылки, которое нужно удалить")
-
-			reader := bufio.NewReader(os.Stdin)
-			text, _ := reader.ReadString('\n')
-			_ = text
-
-			myMap.DelURL(text)
-		case 'l':
-			// Вывод списка добавленных url. Выведите количество добавленных url и список с данными url
-			myMap.ShowAllURLs()
-
-		default:
-			// Если нажата Esc выходим из приложения
-			if key == keyboard.KeyEsc {
-				return
-			}
-		}
-	}
+	myMap.Del("vk")
+	myMap.ShowAllURLs()
 }
